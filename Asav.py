@@ -6,11 +6,15 @@ from password_generator import PasswordGenerator
 
 class  Update_Password:
     name = ""
+    Username = ""
     password = ""
+    email = ""
 
-    def __init__(self,name,password):
+    def __init__(self, name, password, email, Username):
         self.name = name
         self.password =password
+        self.email = email
+        self.Username = Username
 
     def check_username(self):
        base_url = "https://192.168.42.50/api/objects"
@@ -32,7 +36,7 @@ class  Update_Password:
        else:
             return False
 
-    def genrate_password(self):
+    def generate_password(self):
 
         pwo = PasswordGenerator()
         pwo.minlen = 8 # (Optional)
@@ -73,14 +77,14 @@ class  Update_Password:
             check= requests.put(url=base_url+end_url ,headers=headers, data=data, verify=False)
             return check
 
-    def send_email(self, email):
+    def send_email(self):
         email = ""
         outlook = win32com.client.Dispatch('outlook.application')
         mail = outlook.CreateItem(0)
-        mail.To = email
+        mail.To = self.email
         mail.Subject = 'VPN Credentials'
         mail.HTMLBody = '<h3>This is HTML Body</h3>'
-        mail.Body = "Good Day \n \n" +"Your new vpn password is \n" +"Password: " + self.password + "\n \n Regards," + " \n Nsindiso M Matshanga"
+        mail.Body = "Good Day "+ self.Username + "\n\nYour vpn credentials are \n"+"Username: "+ self.name +"\nPassword: " + self.password + "\n\nRegards," + "\nNsindiso M Matshanga"
         mail.CC = 'nsindiso.matshanga@yahoo.com'
         mail.Send()
         print("Credentials have been sent to the user")
@@ -104,14 +108,15 @@ class  Update_Password:
 
 if  __name__ == "__main__":
 
-    name = input('What is the username for the user;s VPN account: ')
-    check =Update_Password(name, 0)
+    Username = input("Please type the name of the client: ")
+    name = input("What is the username for the clients VPN account: ")
+    check =Update_Password(name, 0, "none", Username)
     check.check_username()
 
     if check.check_username() == True:
-        password = check.genrate_password()
-        email_address = input("Please type clients email address: ")
-        update = Update_Password(name, password)
+        password = check.generate_password()
+        email_address = input("Please type the clients email address: ")
+        update = Update_Password(name, password,email_address, Username)
         update.update_password()
-        update.send_email(email_address)
+        update.send_email()
         update.save_password()
